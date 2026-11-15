@@ -6,6 +6,7 @@
 <title>Reader</title>
 <link rel="stylesheet" href="fonts.css">
 <link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="motion-lab.css">
 </head>
 <body>
 <div id="app" class="reader skin-room sp-indent dc reactive ei-subtle" lang="en">
@@ -15,15 +16,28 @@
   <div class="glow"><i></i><i></i></div>
   <div id="libScroll">
    <header><small id="greet">Good evening</small><h1>Your library</h1></header>
+   <button class="btn sm" id="discoverBtn">Find novels</button>
    <div id="libHero"></div>
    <div id="libGridWrap"></div>
    <div id="libEmpty" class="hidden">
     <div class="eicon">❦</div>
     <b>No books yet</b>
-    <p>Tap <b>Import EPUB</b> and pick a book from your phone. It is copied into the app, so the original file is never changed.</p>
+    <p>Find a novel online, or tap <b>Import EPUB</b> to open a book from your phone.</p>
    </div>
   </div>
+  <div id="shOv"><button id="shX">✕</button><div id="shStage"><div id="shHold"></div></div>
+   <div id="shInfo"><h2 id="shTitle"></h2><div id="shAuthor"></div><div class="sh-prog"><i id="shP"></i></div><div class="sh-meta"><span id="shM"></span><span id="shW"></span></div><button id="shGo"></button><div class="sh-cvlab"><span>Cover</span><span id="shPickName"></span></div><div id="shPick"></div><div id="shCols"></div><div id="shDef"><span>Use this style for books without a cover, and new imports</span><i class="tg"></i></div><button id="shDel">Remove from library</button></div><div id="shDots"></div></div>
   <button class="fab" id="importBtn"><span>＋</span> Import EPUB</button>
+ </div>
+
+ <div id="discover" class="view hidden" aria-label="Find novels">
+  <div class="discover-scroll">
+   <div class="discover-head"><h1>Find novels</h1><button class="ib" id="discoverClose" aria-label="Close novel search">✕</button></div>
+   <p class="source-intro">Stories from your favourite sources, read your way.</p>
+   <form id="sourceSearch"><label for="sourceSelect">Source</label><select id="sourceSelect"><option value="all">All sources</option></select><label for="sourceQuery">Novel title or link</label><div class="source-search-row"><input id="sourceQuery" type="search" placeholder="Search novels" maxlength="200" autocomplete="off"><button class="btn sm pri" type="submit">Search</button></div></form>
+   <div id="sourceResults" aria-live="polite"></div>
+   <div id="novelDetails" class="hidden"></div>
+  </div>
  </div>
 
  <!-- ================= READER ================= -->
@@ -35,6 +49,7 @@
   <div class="wearL"><div class="edge"></div><div class="crease"></div><div class="ring"></div><div class="ear"></div></div>
   <div class="bm" id="bmHang"></div>
   <div class="top"><button class="ib" id="bBack">‹</button><span class="t" id="topTitle"></span><button class="ib" id="bBook">🔖</button></div>
+  <div id="chapterNotice" class="hidden" role="status"></div>
 
   <div class="scroller" id="scroller"><div class="body" id="body"></div></div>
 
@@ -51,7 +66,7 @@
   <div class="sheet" id="shT">
    <h4>Skin</h4><div class="chips" id="cSkin"><button data-v="room">Warm Room</button><button data-v="aurora">Aurora Glass</button><button data-v="midnight">Midnight</button><button data-v="rain">Rain Canopy</button></div>
    <h4>Typeface</h4><div class="chips" id="cFont">
-    <button data-v="'Literata',serif" style="font-family:Literata">Literata</button><button data-v="'Cormorant Garamond',serif" style="font-family:'Cormorant Garamond';font-weight:600">Cormorant</button><button data-v="'Lora',serif" style="font-family:Lora">Lora</button><button data-v="'Atkinson Hyperlegible',sans-serif" style="font-family:'Atkinson Hyperlegible'">Atkinson</button><button data-v="Inter,sans-serif" style="font-family:Inter">Inter</button></div>
+    <button data-v="'Literata',serif" style="font-family:Literata">Literata</button><button data-v="'Cormorant Garamond',serif" style="font-family:'Cormorant Garamond';font-weight:600">Cormorant</button><button data-v="'Lora',serif" style="font-family:Lora">Lora</button><button data-v="'Atkinson Hyperlegible',sans-serif" style="font-family:'Atkinson Hyperlegible'">Atkinson</button><button data-v="Inter,sans-serif" style="font-family:Inter">Inter</button><button data-v="'Tsukimi Rounded',sans-serif" style="font-family:'Tsukimi Rounded'">Tsukimi</button></div>
    <h4>Size &amp; spacing</h4>
    <div class="row"><label>Size</label><input type="range" id="rSize" min="13" max="26" step="0.5"><output></output></div>
    <div class="row"><label>Line gap</label><input type="range" id="rLh" min="1.3" max="2.1" step="0.05"><output></output></div>
@@ -71,6 +86,8 @@
    <h4>Mood</h4>
    <div class="chips" id="cMood"><button data-v="#d4a64a">Calm</button><button data-v="#c0452a">Tense</button><button data-v="#4f7bff">Sad</button><button data-v="#8b5cf6">Mystery</button><button data-v="#3fbf8f">Hopeful</button></div>
    <div class="tg"><span>Auto mood from the story<small>Reads the emotion of the paragraphs around you</small></span><button id="tAuto"></button></div>
+   <div class="tg"><span>Book moments<small>Opening, chapter turns, endings and earned bookmarks. Tap to skip.</small></span><button id="tBookMoments"></button></div>
+   <div class="tg"><span>Dialogue colours<small>Each line of dialogue gets a light tint from its first two words.</small></span><button id="tSpeakers"></button></div>
    <h4>Living text</h4>
    <div style="font-size:12px;margin-bottom:6px;color:var(--dim)">Emotion words (tears, frost, fire, anger…)</div><div class="chips" id="cEmo"><button data-v="off">Off</button><button data-v="subtle">Subtle</button><button data-v="expressive">Expressive</button></div><div style="height:6px"></div>
    <div class="tg"><span>Reactive ink<small>Whispers fade in, shouts hit, loud words flash</small></span><button id="tInk"></button></div>
@@ -85,7 +102,10 @@
 
   <!-- book: bookmarks, tracker, wear -->
   <div class="sheet" id="shB">
-   <div class="hintbox"><b>Your place is always saved automatically.</b> Bookmarks are decoration only. They are earned silently; the next time you open the book, the new one slides out.</div>
+   <div class="hintbox"><b>Your place is always saved automatically.</b> Save extra places below. Decorative bookmarks are earned as you read.</div>
+   <h4>Saved places</h4><button class="btn sm" id="savePlaceBtn">Save this place</button><div id="savedPlaces"></div>
+   <button class="btn sm hidden" id="refreshChaptersBtn">Refresh chapters</button>
+   <p id="onlineSource" class="source-message"></p>
    <h4>Bookmarks · earned as you read</h4>
    <div class="bmgrid" id="bmGrid"></div>
    <div class="row" style="margin-top:10px"><label>Furthest</label><span id="maxp" style="font-size:12px;color:var(--ui)">0%</span></div>
@@ -124,6 +144,8 @@
 
  <div class="toast" id="toast"></div>
 </div>
+<script src="motion-lab.js"></script>
 <script src="app.js"></script>
+<script src="sources.js"></script>
 </body>
 </html>

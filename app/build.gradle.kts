@@ -2,6 +2,12 @@ plugins {
     id("com.android.application")
 }
 
+dependencies {
+    implementation("org.jsoup:jsoup:1.22.2")
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.json:json:20250517")
+}
+
 android {
     namespace = "app.reader.proto"
     compileSdk = 36

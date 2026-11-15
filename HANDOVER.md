@@ -1,5 +1,18 @@
 # Handover: Reader app (Android ebook reader with living text)
 
+## Update: 15 November 2026 — online sources
+
+The owner has now requested and authorized direct source integration for their
+private app. The older EPUB-only scope below is superseded. NovelFull,
+FreeWebNovel, ReadNovelFull, NovelPing and ReadFrom.Net are implemented under
+`java/app/reader/proto/sources/`; the discovery UI is in `assets/web/sources.js`.
+The existing reader handles both EPUBs and cached online chapters. The book
+sheet now also has saved-position bookmarks and online chapter refresh.
+Provider IDs and capabilities come from the native source registry. The
+separate Connect browser has no Android reader bridge. See README.md for use,
+tests, and the QuickNovel provenance/license notices. Unrelated themes and
+effects below were not changed by this integration.
+
 Written for whoever picks this up next (a fresh Claude session or a developer). It covers the vision, the current state of the code and the phone, the decisions already made, how to build and test, and what is planned next. Read sections 1 to 4 first.
 
 ---

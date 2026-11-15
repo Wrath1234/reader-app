@@ -1,6 +1,7 @@
 package app.reader.proto
 
 import android.app.Activity
+import android.app.Dialog
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
@@ -20,22 +21,36 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.webkit.WebSettings
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import android.window.OnBackInvokedDispatcher
 import org.json.JSONObject
+import org.json.JSONArray
+import app.reader.proto.sources.OnlineLibrary
+import app.reader.proto.sources.SourceHttp
+import app.reader.proto.sources.SourceAccessException
+import app.reader.proto.sources.Sources
+import java.util.concurrent.Executors
 import java.io.ByteArrayInputStream
 import java.io.InputStream
 
 /**
  * Native shell. The reader UI runs in a WebView served from a private
  * in-app origin; this class imports and serves EPUB content and exposes a
- * small bridge (library, haptics, image saving). The app has no internet
- * permission, so nothing leaves the device.
+ * small bridge. Online providers fetch chapters on workers and serve sanitized
+ * content through the same private origin as EPUB chapters.
  */
 class MainActivity : Activity() {
 
     private lateinit var web: WebView
     private lateinit var lib: Library
+    private lateinit var online: OnlineLibrary
+    private lateinit var sourceHttp: SourceHttp
+    private val sourceWorkers = Executors.newFixedThreadPool(4)
+    private var sourceDialog: Dialog? = null
     private var topDp = 0f
     private var botDp = 0f
 
@@ -47,6 +62,8 @@ class MainActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         lib = Library(this)
+        sourceHttp = SourceHttp(WebSettings.getDefaultUserAgent(this))
+        online = OnlineLibrary(this, sourceHttp)
         window.setDecorFitsSystemWindows(false)
 
         // debug builds only: allows inspecting the page from a computer over adb
@@ -109,7 +126,7 @@ class MainActivity : Activity() {
     // ---------- content serving ----------
 
     private fun serve(u: Uri): WebResourceResponse? {
-        if (u.host != HOST) return null
+        if (u.host != HOST || u.scheme != "https") return notFound()
         val path = u.path ?: return notFound()
         return try {
             when {
@@ -121,17 +138,34 @@ class MainActivity : Activity() {
                     val rest = path.removePrefix("/book/")
                     val cut = rest.indexOf('/')
                     if (cut < 0) return notFound()
-                    val ins = lib.entry(rest.substring(0, cut), rest.substring(cut + 1)) ?: return notFound()
+                    val id = rest.substring(0, cut)
+                    val ins = if (online.contains(id)) online.entry(id, rest.substring(cut + 1))
+                        else lib.entry(id, rest.substring(cut + 1)) ?: return notFound()
                     ok(ins, mime(rest))
                 }
+                path == "/online/image" -> {
+                    val source = Sources.get(u.getQueryParameter("source") ?: return notFound())
+                    val data = online.image(source.id, u.getQueryParameter("url") ?: return notFound())
+                    ok(ByteArrayInputStream(data.first), data.second)
+                }
                 path.startsWith("/cover/") -> {
-                    val c = lib.cover(path.removePrefix("/cover/")) ?: return notFound()
-                    ok(c.first, c.second)
+                    val id = path.removePrefix("/cover/")
+                    if (online.contains(id)) {
+                        val meta = online.book(id)
+                        val image = online.image(meta.getString("sourceId"), meta.getString("coverUrl"))
+                        ok(ByteArrayInputStream(image.first), image.second)
+                    } else {
+                        val c = lib.cover(id) ?: return notFound()
+                        ok(c.first, c.second)
+                    }
                 }
                 else -> notFound()
             }
         } catch (e: Exception) {
-            notFound()
+            val body = JSONObject().put("error", e.message ?: "Could not load this content.")
+            if (e is SourceAccessException) body.put("source", e.sourceId).put("code", "connect")
+            WebResourceResponse("application/json", "utf-8", 502, "Source unavailable", emptyMap(),
+                ByteArrayInputStream(body.toString().toByteArray()))
         }
     }
 
@@ -201,22 +235,87 @@ class MainActivity : Activity() {
         }.start()
     }
 
-    private fun js(code: String) = runOnUiThread { web.evaluateJavascript(code, null) }
+    private fun js(code: String) = runOnUiThread { if (!isFinishing && !isDestroyed) web.evaluateJavascript(code, null) }
+
+    /** This browser has no reader bridge; cookies are shared with native requests. */
+    private fun connectSource(id: String) {
+        val source = runCatching { Sources.get(id) }.getOrNull() ?: return
+        sourceDialog?.dismiss()
+        val dialog = Dialog(this, android.R.style.Theme_Material_NoActionBar)
+        sourceDialog = dialog
+        val layout = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(0, 36, 0, 24) }
+        val label = TextView(this).apply { text = "${source.name}\nComplete any verification, then tap Done."; setPadding(24, 16, 24, 12) }
+        val done = Button(this).apply { text = "Done"; setOnClickListener { dialog.dismiss() } }
+        val browser = WebView(this).apply {
+            source.httpUserAgent?.let { settings.userAgentString = it }
+            settings.javaScriptEnabled = true
+            settings.domStorageEnabled = true
+            settings.allowFileAccess = false
+            settings.allowContentAccess = false
+            settings.mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
+            webViewClient = object : WebViewClient() {
+                override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean =
+                    runCatching { source.url(request.url.toString()) }.isFailure
+            }
+        }
+        layout.addView(label)
+        layout.addView(done)
+        layout.addView(browser, LinearLayout.LayoutParams(-1, 0, 1f))
+        dialog.setContentView(layout)
+        dialog.setOnDismissListener {
+            browser.stopLoading(); browser.destroy()
+            android.webkit.CookieManager.getInstance().flush()
+            sourceDialog = null
+            js("window.__sourceConnected&&window.__sourceConnected(${JSONObject.quote(id)})")
+        }
+        dialog.show()
+        dialog.window?.setLayout(-1, -1)
+        browser.loadUrl(source.base)
+    }
+
+    override fun onDestroy() {
+        sourceDialog?.dismiss()
+        sourceWorkers.shutdownNow()
+        web.destroy()
+        super.onDestroy()
+    }
 
     // ---------- bridge ----------
 
     inner class Bridge {
         @JavascriptInterface
-        fun listBooks(): String = lib.listJson()
+        fun listBooks(): String {
+            val list = JSONArray(lib.listJson())
+            val remote = online.list()
+            for (i in 0 until remote.length()) list.put(remote.getJSONObject(i))
+            return list.toString()
+        }
 
         @JavascriptInterface
-        fun getBook(id: String): String = lib.bookJson(id)
+        fun getBook(id: String): String = if (online.contains(id)) online.book(id).apply { remove("chapters") }.toString() else lib.bookJson(id)
 
         @JavascriptInterface
         fun importBook() = runOnUiThread { pick() }
 
         @JavascriptInterface
-        fun deleteBook(id: String) = lib.delete(id)
+        fun deleteBook(id: String) { if (online.contains(id)) online.delete(id) else lib.delete(id) }
+
+        @JavascriptInterface
+        fun sourceRequest(requestId: String, payload: String) {
+            if (!requestId.matches(Regex("[0-9]{1,12}")) || payload.length > 10000) return
+            sourceWorkers.execute {
+                val result = try { JSONObject().put("data", online.request(JSONObject(payload)).apply { remove("chapters") }) }
+                catch (e: Exception) {
+                    JSONObject().put("error", e.message ?: "The source could not be reached.").also {
+                        if (e is SourceAccessException) it.put("code", "connect").put("source", e.sourceId)
+                    }
+                }
+                js("window.__sourceResult&&window.__sourceResult(${JSONObject.quote(requestId)},$result)")
+            }
+        }
+
+        @JavascriptInterface
+        fun connectSource(id: String) = runOnUiThread { this@MainActivity.connectSource(id) }
 
         @JavascriptInterface
         fun insets(): String = "$topDp,$botDp"

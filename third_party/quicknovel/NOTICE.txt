@@ -1,0 +1,12 @@
+Reader's SourceProvider.kt and ReadFromProvider.kt adapt selectors and retrieval flows from QuickNovel,
+https://github.com/LagradOst/QuickNovel, commit
+06295a438875054e459d3f6e4113143966a991ea.
+
+Original files: AllNovelProvider.kt, NovelFullProvider.kt,
+FreewebnovelProvider.kt, ReadNovelFullProvider.kt, NovelBinProvider.kt and ReadfromnetProvider.kt.
+Copyright QuickNovel contributors. Licensed under GNU GPL version 3.
+The accompanying LICENSE is the upstream license text.
+
+Adapted 15 November 2026: standalone synchronous provider contract, shared
+parsing, restricted URLs, Reader metadata/chapter adapter and sanitized HTML.
+This project is being modified for its owner's private use.

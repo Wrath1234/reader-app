@@ -1,0 +1,104 @@
+/* Lab decorations are out of flow. Source text, inline wrapping and quote offsets stay intact. */
+#app .lab-word{position:relative;animation:none!important;transition:none!important;text-shadow:none!important;transform:none!important;will-change:auto!important}
+#app .lab-word::before,#app .lab-word::after{content:none!important;animation:none!important}
+#app .lab-word:not(.lab-set){color:inherit!important}
+#app .lab-hidden,#app .lab-hidden .w{color:transparent!important;text-shadow:none!important}
+.lab-deco{position:absolute;pointer-events:none;user-select:none;font:inherit;line-height:inherit;text-indent:0;animation:none!important;will-change:auto}
+.lab-glyph{left:0;top:0;bottom:0;display:flex;align-items:center;white-space:nowrap;color:var(--lab-color);font-style:inherit;transform-origin:50% 80%}
+.lab-glyph::before{content:attr(data-text);font:inherit;line-height:1}
+.lab-slash{left:-.14em;top:.95em;width:calc(100% + .36em);height:.34em;rotate:-2.2deg;opacity:.9;background-size:100% 100%;transform-origin:left}
+.lab-fleck,.lab-dust,.lab-crumb{background:var(--lab-color);border-radius:20%}
+.lab-fear-line{left:-.05em;top:.94em;width:calc(100% + .55em);height:.46em;opacity:.62}
+.lab-plate{inset:-.02em -.2em -.06em;border-radius:.14em;box-shadow:inset 0 1.5px 0 #0009,inset 1.5px 0 0 #0006,0 1px 0 #ffffff29,1px 0 0 #ffffff17;opacity:.75}
+.lab-dust{top:1em;width:.055em;height:.055em;border-radius:50%;opacity:0}
+.lab-crumb{left:calc(100% - .1em);top:1em;width:.06em;height:.05em;opacity:0}
+.lab-aged{inset:-.7em -.6em -.25em;border-radius:50%;background:radial-gradient(ellipse,#cdaa7621,#cdaa760f 55%,transparent 72%);z-index:-1}
+.lab-gold{background:linear-gradient(135deg,#fff4c8,#e2b24e 55%,#b98a2e);opacity:.85}
+.lab-pressure{left:50%;top:.92em;width:.7em;height:.16em;margin-left:-.35em;border-radius:50%;background:var(--acc);opacity:0}
+.lab-dots{inset:0}.lab-dots i{position:absolute;top:72%;width:.12em;height:.12em;border-radius:50%;background:var(--lab-color);opacity:0}
+#app .lab-whisper{animation:none!important;transition:none!important}
+#app.reactive:not(.ei-off) .lab-whisper-seen{opacity:.7;font-style:italic}
+#app .lab-whisper .w{transition:none}
+#app #body .w.pw::after,#app #body .w.fd::after,#app #body .w.pw::before,#app #body .w.fd::before{content:'';position:absolute;left:-.2em;right:-.2em;top:6%;bottom:-4%;z-index:-1;pointer-events:none;transform-origin:left center;rotate:var(--lab-rt,0deg);translate:0 var(--lab-ty,0);background:var(--lab-wash) center/100% 100% no-repeat}
+#app #body .w.pw::before,#app #body .w.fd::before{top:60%;bottom:-12%;background-image:var(--lab-bristle)}
+#app #body .w.pw::after,#app #body .w.pw::before{animation:lab-guide-in var(--d,300ms) cubic-bezier(.25,.6,.4,1) both}
+#app #body .w.pw::before{animation-delay:calc(var(--d,300ms)*.12)}
+#app #body .w.fd::after{animation:lab-guide-out .8s ease-out both}
+#app #body .w.fd::before{animation:lab-guide-bristle 2.8s cubic-bezier(.5,0,.8,.5) both}
+@keyframes lab-guide-in{from{transform:scaleX(.02)}to{transform:scaleX(1)}}
+@keyframes lab-guide-out{from{opacity:1}to{opacity:0}}
+@keyframes lab-guide-bristle{from{opacity:.9}to{opacity:0}}
+#app.ei-subtle #body .w.pw::after,#app.ei-off #body .w.pw::after{animation:lab-guide-soft .18s both;rotate:0deg;translate:0 0}
+#app.ei-subtle #body .w.pw::before,#app.ei-off #body .w.pw::before{animation:none;opacity:.35}
+@keyframes lab-guide-soft{from{opacity:.3}to{opacity:1}}
+.lab-intro-ornament{display:flex;align-items:center;justify-content:center;gap:10px;margin:14px auto 12px;pointer-events:none;text-indent:0;line-height:1}
+.lab-intro-ornament i{display:block;width:74px;height:1px;background:linear-gradient(90deg,transparent,var(--acc));transform-origin:100% 50%}
+.lab-intro-ornament i:last-child{background:linear-gradient(270deg,transparent,var(--acc));transform-origin:0 50%}
+.lab-intro-ornament b{display:block;width:9px;height:9px;rotate:45deg;border:1px solid var(--acc)}
+.lab-cap{position:absolute;left:0;top:0;pointer-events:none;font-style:normal;transform-origin:30% 60%}.lab-cap::before{content:attr(data-text)}
+.lab-moment{position:fixed;inset:0;z-index:250;overflow:hidden;background:var(--paper,#241c22);color:var(--txt);perspective:1100px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.lab-opening{background:color-mix(in srgb,var(--paper,#241c22) 92%,transparent)}
+.lab-cover{position:relative;width:170px;height:250px;perspective:1100px;font-size:12px;isolation:isolate}
+.lab-opening>.lab-cover{position:absolute;left:calc(50% - 85px);top:calc(50% - 125px)}
+.lab-cover .cov{position:absolute!important;inset:0;width:100%!important;height:100%!important;aspect-ratio:auto!important;border-radius:2px 5px 5px 2px;z-index:2;backface-visibility:hidden;box-shadow:0 10px 22px #0008;transform-style:preserve-3d;overflow:hidden}
+.lab-cover .cov img{width:100%;height:100%;object-fit:cover}.lab-cover .gen{display:flex;flex-direction:column;align-items:center;justify-content:space-around;text-align:center;padding:18px}
+.lab-cover-paper{position:absolute;inset:3px 3px 3px 0;background:var(--paper,#eee4d1);color:var(--txt);padding:24px 14px;text-align:center;font-size:15px;border-radius:0 3px 3px 0;z-index:1}
+.lab-turn{background:transparent;pointer-events:auto}.lab-turn-edge{position:absolute;left:0;top:0;bottom:0;width:70px;background:linear-gradient(90deg,transparent,#ffffff12 45%,#ffffff21 52%,#0006 56%,transparent)}
+.lab-finish-end{position:absolute;inset:20% 26px auto;text-align:center}.lab-finish-end>em{display:block;font:italic 28px 'Cormorant Garamond',Georgia,serif;margin-top:20px}
+.lab-finish-card{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column}
+.lab-finish-card .lab-cover{width:140px;height:205px}
+.lab-ribbon{position:absolute;left:92px;top:203px;width:13px;height:44px;background:linear-gradient(90deg,#6a1823,#a8323f 50%,#6a1823);clip-path:polygon(0 0,100% 0,100% 100%,50% 82%,0 100%);transform-origin:50% 0;z-index:3}
+.lab-foil{position:absolute;inset:-20% 0;width:46px;left:40%;background:linear-gradient(90deg,transparent,#fff0c847,transparent);z-index:4;opacity:0;pointer-events:none}
+.lab-finish-text{margin:60px 20px 0;text-align:center;font:13px/1.6 system-ui;color:var(--dim)}.lab-finish-text>em{display:block;color:var(--txt);font:italic 20px Georgia,serif;margin-bottom:5px}
+.lab-moment-hint{position:absolute;bottom:calc(30px + var(--sab,0px));left:0;right:0;text-align:center;font:11px system-ui;color:var(--dim)}
+.lab-bm-swing{position:absolute;right:44px;top:0;width:34px;transform-origin:50% 0}.lab-bm-ribbon{position:relative;display:block;overflow:hidden;transform-origin:50% 0}.lab-bm-ribbon svg{display:block;width:34px;height:128px}.lab-bm-glint{position:absolute;left:-10px;right:-10px;height:26px;top:0;background:linear-gradient(transparent,#fff0cd80,transparent);opacity:0}
+.lab-bm-label{position:absolute;right:92px;top:calc(30px + var(--sat,0px));max-width:65%;text-align:right;font:12px/1.45 system-ui;color:var(--dim);background:var(--paper);border:1px solid #ffffff1c;border-radius:12px;padding:9px 13px}.lab-bm-label b{display:block;color:var(--txt);font:italic 17px Georgia,serif}
+#app.lab-reduced #body .w::before,#app.lab-reduced #body .w::after{animation:none!important;rotate:0deg;translate:0 0}
+#app.lab-reduced #body .w.fd::before,#app.lab-reduced #body .w.fd::after{opacity:0}
+@media(prefers-reduced-motion:reduce){#app .lab-deco,#app .lab-moment *{animation:none!important;transition:none!important}}
+
+#app .lab-whisper{opacity:.7!important;letter-spacing:inherit!important}
+#app.ei-off .lab-whisper{opacity:1!important;font-style:inherit}
+#body{position:relative}
+#body .hd{position:relative}
+#body .hd>.lab-intro-ornament{position:absolute;left:0;right:0;bottom:-19px;margin:0;height:12px}
+#body .lab-title-hidden{color:transparent!important;text-shadow:none!important}
+.lab-title-mask{position:absolute;overflow:hidden;white-space:nowrap;width:max-content;min-width:0;pointer-events:none;text-indent:0;font:inherit;line-height:1;text-align:left}
+.lab-title-line{display:block;width:max-content;text-align:left;font:inherit;line-height:1}.lab-title-line::before{content:attr(data-text)}
+#app.dc p.lab-intro-cap::first-letter{color:transparent;text-shadow:none}
+.skin-room{--paper:#1d110a}.skin-aurora{--paper:#0d0d17}.skin-midnight{--paper:#080d18}.skin-rain{--paper:#0a1714}
+
+/* drawn lines: a static clip whose content slides in (see draw() in motion-lab.js) */
+.lab-wipe{overflow:hidden}.lab-wipe>i:not(.lab-deco){position:absolute;inset:0;background-size:100% 100%;background-repeat:no-repeat}
+#app .lab-word.emo-wary{text-decoration:none!important}
+.lab-run{top:.95em;width:.05em;margin-left:-.025em;transform-origin:50% 0;border-radius:0 0 .03em .03em;background:linear-gradient(#96afe1cc,#96afe159);opacity:.8}
+.lab-bead{width:.075em;height:.095em;margin-left:-.0375em;border-radius:45% 45% 50% 50%;background:#aac3eee6}
+.lab-flourish{left:-.06em;top:.9em;width:calc(100% + .5em);height:.6em;opacity:.78}
+.lab-tick{width:.3em;height:.3em;opacity:.65;border:0 solid #c6d6a0f2}.lab-tick-a{left:-.17em;top:.06em;border-width:1.5px 0 0 1.5px}.lab-tick-b{right:-.17em;top:.8em;border-width:0 1.5px 1.5px 0}
+.lab-flick{left:calc(100% - .03em);top:.1em;width:.85em;height:.24em;transform-origin:0 50%;rotate:-54deg;opacity:.85}
+.lab-dot{border-radius:50%;background:var(--lab-color);opacity:.8}
+.lab-caesura{top:.03em;width:1.5px;height:1.05em;rotate:14deg;opacity:.85}.lab-caesura>i:not(.lab-deco){background-color:#bebed2f2}
+.lab-smear{right:calc(100% - .1em);top:.3em;width:1.5em;height:.62em;transform-origin:100% 50%;opacity:.55;background-size:100% 100%;background-repeat:no-repeat}
+.lab-crease{left:58%;top:1.04em;height:3px;transform-origin:0 50%;opacity:.55;background-size:100% 100%;background-repeat:no-repeat}
+.lab-fox{background:radial-gradient(circle,#a09446bf 0 30%,#8c803e80 55%,#b2a65c52 68%,transparent 76%)}
+.lab-breath{left:0;right:0;top:1.05em;height:1.5px;background:linear-gradient(90deg,transparent,#b8c2e2f2 30% 70%,transparent);opacity:.6;transform:scaleX(.7)}
+/* keep every mark at its designed distance from the baseline, whatever the reading font (see baseline() in motion-lab.js) */
+.lab-deco:not(.lab-glyph):not(.lab-plate):not(.lab-aged):not(.lab-ell){margin-top:var(--lab-o,0em)}
+/* dialogue colours: a light tint per line from its first two words; tone tints (angry, crying...) still win */
+:where(.spk) .dlg.sp{color:color-mix(in srgb,var(--sp) 45%,var(--txt))}
+/* opening a book: the paper under the cover holds a scaled copy of the page */
+.lab-cover-paper{padding:0;overflow:hidden;text-align:left}
+.lab-cover-paper.lab-paper-wait{padding:24px 14px;text-align:center}
+.lab-preview{position:absolute;left:0;top:14px;transform-origin:0 0;color:var(--txt);pointer-events:none}
+.lab-preview>*{animation:none!important}
+/* the preview is a printed page: even ink, justified, a shadow in the gutter and a lit fore-edge */
+.lab-cover-paper:not(.lab-paper-wait){background:linear-gradient(90deg,#000a,#0000 16%,#0000 90%,#ffffff0d),var(--paper)}
+.lab-preview p{margin:0;text-indent:1.3em;text-align:justify;hyphens:auto;color:var(--txt);opacity:.92}
+.lab-preview .lab-pv-h{text-align:center;font:600 1.35em/1.2 'Cormorant Garamond',Georgia,serif;margin:.2em 0 .9em;color:var(--txt)}
+.lab-preview .lab-pv-h+p{text-indent:0}
+.lab-preview .lab-pv-orn{height:1px;width:30%;margin:1em auto;background:var(--acc);opacity:.6}
+/* the opened book: back board and page edges behind the page, the inside of the cover lying open on the left */
+.lab-cover-paper{font-style:normal;box-shadow:1.5px 0 0 #ffffff14,3px 0 0 #0006,4.5px 0 0 #ffffff10,0 1.5px 0 #ffffff12}
+.lab-cover-paper:not(.lab-paper-wait){background:linear-gradient(90deg,#000b,#0000 15%,#0000 92%,#ffffff0a),color-mix(in srgb,var(--paper) 90%,#fff)}
+.lab-cover-back{position:absolute;inset:-5px -8px -5px -2px;background:linear-gradient(90deg,#0008,#0000 30%),#3a2619;border-radius:3px 6px 6px 3px;z-index:0;box-shadow:0 16px 30px #000c}
+.lab-cover-inside{position:absolute;top:-5px;bottom:-5px;right:calc(100% + 1px);width:97%;background:linear-gradient(270deg,#000a,#0000 20%,#0000 85%,#0004),#54412f;border-radius:6px 2px 2px 6px;z-index:0;opacity:0;transform-origin:100% 50%;box-shadow:0 16px 30px #000a}
